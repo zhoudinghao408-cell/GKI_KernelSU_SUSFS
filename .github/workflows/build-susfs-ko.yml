@@ -25,13 +25,13 @@ jobs:
       - name: Prepare build environment
         run: |
           # 复制kallsyms到源码目录
-          cp ${{ github.workspace }}/${{ inputs.kallsyms_file }} susfs/kallsyms.txt
+          cp ${{ github.workspace }}/${{ inputs.kallsyms_file }} susfs/susfs4ksu-gki-android14-6.1/kallsyms.txt
           # 给构建脚本执行权限
-          chmod +x susfs/build_ksu_susfs_tool.sh
+          chmod +x susfs/susfs4ksu-gki-android14-6.1/build_ksu_susfs_tool.sh
 
       - name: Build susfs.ko
         run: |
-          cd susfs
+          cd susfs/susfs4ksu-gki-android14-6.1
           ./build_ksu_susfs_tool.sh KERNEL_VERSION=${{ inputs.kernel_version }} KALLSYMS=kallsyms.txt
 
       - name: Upload artifact
