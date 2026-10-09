@@ -20,13 +20,7 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt update
-          sudo apt install -y build-essential gcc-aarch64-linux-gnu bison flex libssl-dev bc wget unzip
-
-      - name: Download SUSFS source
-        run: |
-          wget -q -O susfs-main.zip https://github.com/simonpunk/susfs4ksu/archive/refs/heads/main.zip
-          unzip -q susfs-main.zip
-          mv susfs4ksu-main susfs
+          sudo apt install -y build-essential gcc-aarch64-linux-gnu bison flex libssl-dev bc
 
       - name: Prepare build config
         run: |
