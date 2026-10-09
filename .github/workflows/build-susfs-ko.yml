@@ -22,20 +22,20 @@ jobs:
           sudo apt update
           sudo apt install -y build-essential gcc-aarch64-linux-gnu bison flex libssl-dev bc
 
-      - name: Prepare build config
+      - name: Prepare build environment
         run: |
+          # 复制kallsyms到源码目录
           cp ${{ github.workspace }}/${{ inputs.kallsyms_file }} susfs/kallsyms.txt
-          cd susfs
-          echo "CONFIG_KSU_SUSFS=m" > config
-          echo "TARGET_KERNEL_VERSION=${{ inputs.kernel_version }}" >> config
+          # 给构建脚本执行权限
+          chmod +x susfs/build_ksu_susfs_tool.sh
 
       - name: Build susfs.ko
         run: |
           cd susfs
-          make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j$(nproc)
+          ./build_ksu_susfs_tool.sh KERNEL_VERSION=${{ inputs.kernel_version }} KALLSYMS=kallsyms.txt
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: susfs-ko
-          path: susfs/susfs.ko
+          path: "**/susfs.ko"
