@@ -1,0 +1,45 @@
+name: Build SUSFS KO
+on:
+  workflow_dispatch:
+    inputs:
+      kernel_version:
+        description: "Kernel version (e.g. 6.1.145)"
+        required: true
+        default: "6.1.145"
+      kallsyms_file:
+        description: "Kallsyms file name in repo root"
+        required: true
+        default: "kallsyms.txt"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential gcc-aarch64-linux-gnu bison flex libssl-dev bc
+
+      - name: Clone SUSFS source
+        run: |
+          git clone https://github.com/simonpunk/susfs4ksu.git -b gki-android14-6.1 susfs
+
+      - name: Prepare kernel headers from kallsyms
+        run: |
+          cp ${{ github.workspace }}/${{ inputs.kallsyms_file }} susfs/kallsyms.txt
+          cd susfs
+          echo "CONFIG_KSU_SUSFS=m" >> config
+          echo "TARGET_KERNEL_VERSION=${{ inputs.kernel_version }}" >> config
+
+      - name: Build susfs.ko
+        run: |
+          cd susfs
+          make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j$(nproc)
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: susfs-ko
+          path: susfs/susfs.ko
