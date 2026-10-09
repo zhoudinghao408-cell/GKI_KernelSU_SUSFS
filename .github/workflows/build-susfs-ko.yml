@@ -13,24 +13,26 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
       - name: Install build dependencies
         run: |
           sudo apt update
-          sudo apt install -y build-essential gcc-aarch64-linux-gnu bison flex libssl-dev bc
+          sudo apt install -y build-essential gcc-aarch64-linux-gnu bison flex libssl-dev bc wget unzip
 
-      - name: Clone SUSFS source
+      - name: Download SUSFS source
         run: |
-          git clone https://github.com/simonpunk/susfs4ksu.git -b gki-android14-6.1 susfs
+          wget -q -O susfs-main.zip https://github.com/simonpunk/susfs4ksu/archive/refs/heads/main.zip
+          unzip -q susfs-main.zip
+          mv susfs4ksu-main susfs
 
-      - name: Prepare kernel headers from kallsyms
+      - name: Prepare build config
         run: |
           cp ${{ github.workspace }}/${{ inputs.kallsyms_file }} susfs/kallsyms.txt
           cd susfs
-          echo "CONFIG_KSU_SUSFS=m" >> config
+          echo "CONFIG_KSU_SUSFS=m" > config
           echo "TARGET_KERNEL_VERSION=${{ inputs.kernel_version }}" >> config
 
       - name: Build susfs.ko
